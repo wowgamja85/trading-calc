@@ -4,38 +4,38 @@ import streamlit.components.v1 as components
 import base64
 
 # 페이지 설정
-st.set_page_config(page_title="XAUUSD 수익 계산기 (9:16)", layout="centered")
+st.set_page_config(page_title="XAUUSD 수익 계산기", layout="centered")
 
 st.title("🎯 트레이딩 수익 계산기")
 
-# 1. 설정 섹션 (접어두기)
-with st.expander("⚙️ 설정 (클릭해서 열기)", expanded=False):
+# 1. 설정 섹션
+with st.expander("⚙️ 기본 설정 (이미지에 포함됨)", expanded=True):
     col1, col2 = st.columns(2)
     with col1:
-        st.subheader("🛡️ 보험금")
+        st.subheader("🛡️ 보험금 설정")
         insLot = st.number_input("보험금 랏수", value=0.7, step=0.1)
-        insTP = st.number_input("보험금 TP", value=540, step=10)
-        insSL = st.number_input("보험금 SL", value=2800, step=100)
+        insTP = st.number_input("보험금 TP (틱)", value=540, step=10)
+        insSL = st.number_input("보험금 SL (틱)", value=2800, step=100)
     with col2:
-        st.subheader("⚔️ 챌린지")
+        st.subheader("⚔️ 챌린지 설정")
         chaLot = st.number_input("챌린지 랏수", value=5.3, step=0.1)
-        chaTP = st.number_input("챌린지 TP", value=2720, step=100)
-        chaSL = st.number_input("챌린지 SL", value=580, step=10)
+        chaTP = st.number_input("챌린지 TP (틱)", value=2720, step=100)
+        chaSL = st.number_input("챌린지 SL (틱)", value=580, step=10)
 
 # 2. 사진 첨부 섹션
 st.subheader("📸 증거 사진 첨부 (선택)")
-uploaded_photo = st.file_uploader("MTS 캡처 등 사진을 올려주세요", type=['png', 'jpg', 'jpeg'])
+uploaded_photo = st.file_uploader("거래 내역 스크린샷 등을 올려주세요", type=['png', 'jpg', 'jpeg'])
 
 # 3. 거래 입력 섹션
 st.subheader("📊 오늘의 거래 입력")
 col_g1, col_g2 = st.columns(2)
-game_type = col_g1.selectbox("게임 종류", [100, 300, 500], index=1)
+game_type = col_g1.selectbox("게임 종류 ($)", [100, 300, 500], index=1)
 fee_per_game = col_g2.number_input("게임당 수수료 ($)", value=0.0)
 
-results_text = st.text_area("거래별 결과 (엔터 구분 입력)", placeholder="예:\n367.5\n-2028")
+results_text = st.text_area("거래별 결과 입력 (엔터로 구분)", placeholder="예:\n367.5\n-2028")
 
-# 4. 계산 및 9:16 대시보드 출력
-if st.button("🚀 9:16 수익 인증 이미지 생성", use_container_width=True):
+# 4. 계산 및 이미지 생성
+if st.button("🚀 수익 인증 이미지 생성하기", use_container_width=True):
     lines = results_text.strip().split('\n')
     results = []
     for line in lines:
@@ -58,11 +58,14 @@ if st.button("🚀 9:16 수익 인증 이미지 생성", use_container_width=Tru
         bg_hex = "linear-gradient(135deg, #00b894, #00cec9)" if net_profit >= 0 else "linear-gradient(135deg, #e17055, #fd79a8)"
         sign = "+" if net_profit >= 0 else ""
         
+        # 거래 내역 테이블 HTML
         table_html = ""
         for i, v in enumerate(results):
             v_color = "#00b894" if v > 0 else "#e17055"
-            table_html += f"<tr><td>{i+1}회</td><td style='color:{v_color}; font-weight:bold;'>{v:+.1f}$</td></tr>"
+            v_label = "수익" if v > 0 else "성공"
+            table_html += f"<tr><td>{i+1}회차</td><td style='color:{v_color}; font-weight:bold;'>{v:+.1f}$</td><td>{v_label}</td></tr>"
 
+        # 사진 처리
         photo_html = ""
         if uploaded_photo:
             photo_b64 = base64.b64encode(uploaded_photo.getvalue()).decode()
@@ -72,36 +75,44 @@ if st.button("🚀 9:16 수익 인증 이미지 생성", use_container_width=Tru
             </div>
             """
 
-        # 9:16 최적화 레이아웃 (너비 360px 기준 높이 640px)
+        # HTML/CSS 9:16 레이아웃
         html_code = f"""
         <!DOCTYPE html>
         <html>
         <head>
             <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
             <style>
-                body {{ margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; background: #f0f2f5; }}
+                body {{ margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; background: #f0f2f5; font-family: 'Apple SD Gothic Neo', sans-serif; }}
                 #captureArea {{ 
-                    width: 360px; 
-                    min-height: 640px; 
-                    background: white; 
-                    padding: 30px 20px; 
-                    border-radius: 20px; 
-                    box-sizing: border-box;
-                    display: flex;
-                    flex-direction: column;
+                    width: 360px; min-height: 640px; background: white; padding: 25px 20px; 
+                    border-radius: 20px; box-sizing: border-box; display: flex; flex-direction: column; 
                 }}
-                .header {{ text-align: center; margin-bottom: 25px; }}
+                .header {{ text-align: center; margin-bottom: 20px; border-bottom: 2px solid #f1f2f6; padding-bottom: 10px; }}
+                .date {{ color:#b2bec3; font-size:12px; font-weight:bold; }}
                 .profit-banner {{ 
-                    background: {bg_hex}; color: white; padding: 25px 15px; 
-                    border-radius: 15px; text-align: center; margin-bottom: 25px; 
+                    background: {bg_hex}; color: white; padding: 20px 10px; 
+                    border-radius: 15px; text-align: center; margin-bottom: 20px; 
                 }}
-                .amount {{ font-size: 38px; font-weight: 900; margin: 5px 0; }}
-                .stats {{ display: flex; justify-content: space-around; margin-bottom: 25px; }}
-                .stat-box {{ text-align: center; font-size: 13px; font-weight: bold; color: #636e72; }}
-                .stat-box span {{ display: block; font-size: 18px; color: #2d3436; margin-top: 5px; }}
+                .amount {{ font-size: 34px; font-weight: 900; margin: 5px 0; }}
+                
+                .settings-grid {{ 
+                    display: grid; grid-template-columns: 1fr 1fr; gap: 10px; 
+                    background: #f8f9fa; padding: 12px; border-radius: 12px; margin-bottom: 20px; font-size: 11px;
+                }}
+                .set-title {{ font-weight: bold; margin-bottom: 5px; color: #2d3436; text-align: center; border-bottom: 1px solid #dfe6e9; }}
+                .set-item {{ display: flex; justify-content: space-between; padding: 2px 0; }}
+                .set-label {{ color: #636e72; }}
+                .set-val {{ font-weight: bold; color: #2d3436; }}
+
+                .stats {{ display: flex; justify-content: space-around; margin-bottom: 20px; }}
+                .stat-box {{ text-align: center; font-size: 12px; font-weight: bold; color: #636e72; }}
+                .stat-box span {{ display: block; font-size: 16px; color: #2d3436; margin-top: 3px; }}
+                
                 .table-container {{ flex-grow: 1; }}
-                .table {{ width: 100%; border-collapse: collapse; font-size: 14px; }}
-                .table td {{ padding: 8px; border-bottom: 1px solid #f1f2f6; text-align: center; }}
+                .table {{ width: 100%; border-collapse: collapse; font-size: 13px; }}
+                .table th {{ background: #f1f2f6; padding: 8px; font-size: 11px; color: #636e72; }}
+                .table td {{ padding: 7px; border-bottom: 1px solid #f1f2f6; text-align: center; }}
+                
                 .btn-down {{ 
                     background: #2d3436; color: white; border: none; padding: 15px; 
                     width: 360px; border-radius: 12px; font-size: 16px; font-weight: bold; 
@@ -112,24 +123,40 @@ if st.button("🚀 9:16 수익 인증 이미지 생성", use_container_width=Tru
         <body>
             <div id="captureArea">
                 <div class="header">
-                    <h2 style="margin:0; font-size: 22px; color: #2d3436;">TRADING REPORT</h2>
-                    <div style="color:#b2bec3; font-size:13px; margin-top:5px; font-weight:bold;">{today_date}</div>
+                    <h2 style="margin:0; font-size: 20px; color: #2d3436; letter-spacing: -0.5px;">트레이딩 수익 인증</h2>
+                    <div class="date">{today_date}</div>
                 </div>
                 
                 <div class="profit-banner">
-                    <div style="font-size:14px; font-weight:bold; opacity:0.9;">TOTAL PROFIT</div>
+                    <div style="font-size:12px; font-weight:bold; opacity:0.9;">오늘의 순손익 (NET PROFIT)</div>
                     <div class="amount">{sign}{net_profit:.1f}$</div>
-                    <div style="font-weight:bold;">ROI: {sign}{profit_rate:.2f}%</div>
+                    <div style="font-weight:bold; font-size: 14px;">수익률: {sign}{profit_rate:.2f}%</div>
+                </div>
+
+                <div class="settings-grid">
+                    <div>
+                        <div class="set-title">🛡️ 보험금 설정</div>
+                        <div class="set-item"><span class="set-label">랏수</span><span class="set-val">{insLot}</span></div>
+                        <div class="set-item"><span class="set-label">TP</span><span class="set-val">{insTP}</span></div>
+                        <div class="set-item"><span class="set-label">SL</span><span class="set-val">{insSL}</span></div>
+                    </div>
+                    <div>
+                        <div class="set-title">⚔️ 챌린지 설정</div>
+                        <div class="set-item"><span class="set-label">랏수</span><span class="set-val">{chaLot}</span></div>
+                        <div class="set-item"><span class="set-label">TP</span><span class="set-val">{chaTP}</span></div>
+                        <div class="set-item"><span class="set-label">SL</span><span class="set-val">{chaSL}</span></div>
+                    </div>
                 </div>
 
                 <div class="stats">
-                    <div class="stat-box">TRADES<span>{count}</span></div>
-                    <div class="stat-box">WIN<span>{win_count}</span></div>
-                    <div class="stat-box">LOSS<span>{loss_count}</span></div>
+                    <div class="stat-box">총 거래<span>{count}회</span></div>
+                    <div class="stat-box">수익<span>{win_count}회</span></div>
+                    <div class="stat-box">성공<span>{loss_count}회</span></div>
                 </div>
 
                 <div class="table-container">
                     <table class="table">
+                        <thead><tr><th>회차</th><th>금액</th><th>결과</th></tr></thead>
                         {table_html}
                     </table>
                 </div>
@@ -137,18 +164,18 @@ if st.button("🚀 9:16 수익 인증 이미지 생성", use_container_width=Tru
                 {photo_html}
             </div>
 
-            <button class="btn-down" onclick="downloadImage()">📸 9:16 이미지 저장하기</button>
+            <button class="btn-down" onclick="downloadImage()">📸 이미지 다운로드 (9:16)</button>
 
             <script>
                 function downloadImage() {{
                     const btn = document.querySelector('.btn-down');
-                    btn.innerText = '⏳ 생성 중...';
+                    btn.innerText = '⏳ 이미지 생성 중...';
                     html2canvas(document.getElementById('captureArea'), {{ scale: 3, useCORS: true }}).then(canvas => {{
                         let link = document.createElement('a');
-                        link.download = 'Trading_916_{datetime.date.today().strftime('%m%d')}.png';
+                        link.download = '수익인증_{datetime.date.today().strftime('%m%d')}.png';
                         link.href = canvas.toDataURL('image/png');
                         link.click();
-                        btn.innerText = '📸 9:16 이미지 저장하기';
+                        btn.innerText = '📸 이미지 다운로드 (9:16)';
                     }});
                 }}
             </script>
@@ -157,7 +184,7 @@ if st.button("🚀 9:16 수익 인증 이미지 생성", use_container_width=Tru
         """
 
         st.divider()
-        st.success("✅ 9:16 비율의 세로형 대시보드가 생성되었습니다!")
-        components.html(html_code, height=900, scrolling=True)
+        st.success("✅ 대시보드가 생성되었습니다. 아래 버튼을 눌러 이미지를 저장하세요.")
+        components.html(html_code, height=950, scrolling=True)
     else:
-        st.error("숫자를 입력해주세요.")
+        st.error("입력값이 없습니다. 숫자를 입력해주세요.")
