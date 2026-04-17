@@ -1,13 +1,14 @@
 import streamlit as st
 import datetime
 import streamlit.components.v1 as components
+import base64
 
 # 페이지 설정
 st.set_page_config(page_title="트레이딩 수익 계산기", layout="centered")
 
 st.title("🎯 트레이딩 수익 계산기")
 
-# 1. 설정 섹션
+# 1. 설정 섹션 (접어두기)
 with st.expander("⚙️ 설정 (클릭해서 열기)", expanded=False):
     col1, col2 = st.columns(2)
     with col1:
@@ -21,7 +22,11 @@ with st.expander("⚙️ 설정 (클릭해서 열기)", expanded=False):
         chaTP = st.number_input("챌린지 TP", value=2720, step=100)
         chaSL = st.number_input("챌린지 SL", value=580, step=10)
 
-# 2. 거래 입력 섹션
+# [복구됨!] 2. 사진 첨부 섹션
+st.subheader("📸 증거 사진 첨부 (선택)")
+uploaded_photo = st.file_uploader("MTS 캡처, 거래내역 스크린샷 등을 올려주세요", type=['png', 'jpg', 'jpeg'])
+
+# 3. 거래 입력 섹션
 st.subheader("📊 오늘의 거래 입력")
 col_g1, col_g2 = st.columns(2)
 game_type = col_g1.selectbox("게임 종류", [100, 300, 500], index=1)
@@ -29,7 +34,7 @@ fee_per_game = col_g2.number_input("게임당 수수료 ($)", value=0.0)
 
 results_text = st.text_area("거래별 결과 (엔터로 구분하여 입력)", placeholder="예:\n367.5\n-2028\n380")
 
-# 3. 계산 및 대시보드 (이미지 다운로드 기능 포함)
+# 4. 계산 및 대시보드
 if st.button("🚀 수익 계산 및 대시보드 생성", use_container_width=True):
     lines = results_text.strip().split('\n')
     results = []
@@ -51,19 +56,33 @@ if st.button("🚀 수익 계산 및 대시보드 생성", use_container_width=T
         
         today_date = datetime.date.today().strftime('%Y년 %m월 %d일')
         
-        # 색상 및 기호 결정
+        # 색상 및 기호
         color_hex = "#00b894" if net_profit >= 0 else "#e17055"
         bg_hex = "linear-gradient(135deg, #00b894, #00cec9)" if net_profit >= 0 else "linear-gradient(135deg, #e17055, #fd79a8)"
         sign = "+" if net_profit >= 0 else ""
         
-        # 상세 거래 내역 테이블 HTML 생성
+        # 테이블 내역 생성
         table_html = ""
         for i, v in enumerate(results):
             v_color = "#00b894" if v > 0 else "#e17055"
             v_text = "수익" if v > 0 else "챌린지 성공"
             table_html += f"<tr><td>{i+1}회차</td><td style='color:{v_color}; font-weight:bold;'>{v:+.1f}$</td><td>{v_text}</td></tr>"
 
-        # [핵심] 파이썬 변수를 넣은 동적 HTML 템플릿 생성 (여기에 캡처 기능이 들어갑니다)
+        # [핵심 추가] 업로드된 사진을 다운로드 이미지 안에 넣기 위한 처리
+        photo_html = ""
+        extra_height = 0
+        if uploaded_photo:
+            # 파이썬으로 받은 이미지를 HTML이 읽을 수 있게 글자로 변환
+            photo_b64 = base64.b64encode(uploaded_photo.getvalue()).decode()
+            photo_html = f"""
+            <div style="margin-top: 25px; padding-top: 20px; border-top: 2px dashed #bdc3c7; text-align: center;">
+                <div style="font-size: 16px; font-weight: bold; color: #2c3e50; margin-bottom: 15px;">📸 증거 사진</div>
+                <img src="data:image/jpeg;base64,{photo_b64}" style="max-width: 100%; max-height: 400px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+            </div>
+            """
+            extra_height = 450 # 사진이 있으면 창 길이를 늘려줌
+
+        # HTML 구조 (여기에 표와 사진이 모두 합쳐집니다)
         html_code = f"""
         <!DOCTYPE html>
         <html>
@@ -106,6 +125,8 @@ if st.button("🚀 수익 계산 및 대시보드 생성", use_container_width=T
                     <tr><th>회차</th><th>회수금액</th><th>결과</th></tr>
                     {table_html}
                 </table>
+                
+                {photo_html}
             </div>
 
             <button class="btn-down" onclick="downloadImage()">📸 인증 이미지 원클릭 다운로드</button>
@@ -115,9 +136,10 @@ if st.button("🚀 수익 계산 및 대시보드 생성", use_container_width=T
                     const btn = document.querySelector('.btn-down');
                     btn.innerText = '⏳ 이미지 생성 중...';
                     
-                    html2canvas(document.getElementById('captureArea'), {{ scale: 2 }}).then(canvas => {{
+                    html2canvas(document.getElementById('captureArea'), {{ scale: 2, useCORS: true }}).then(canvas => {{
                         let link = document.createElement('a');
-                        link.download = '수익인증_{datetime.date.today().strftime('%Y%m%d')}.png';
+                        let today = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+                        link.download = '수익인증_' + today + '.png';
                         link.href = canvas.toDataURL('image/png');
                         link.click();
                         btn.innerText = '📸 인증 이미지 원클릭 다운로드';
@@ -129,12 +151,11 @@ if st.button("🚀 수익 계산 및 대시보드 생성", use_container_width=T
         """
 
         st.divider()
-        st.success("✅ 계산 완료! 아래 화면에서 곧바로 이미지를 다운로드하세요.")
+        st.success("✅ 계산 완료! 첨부하신 사진도 인증 이미지 가장 아래에 자동으로 합성됩니다.")
         
-        # 파이썬 화면 안에 HTML 창을 띄워서 렌더링
-        # (거래 횟수에 따라 창 크기가 길어질 수 있으므로 height를 여유있게 잡습니다)
-        box_height = 500 + (count * 40)
-        components.html(html_code, height=box_height)
+        # 화면에 표시되는 창 크기를 사진 유무에 따라 조절
+        box_height = 500 + (count * 40) + extra_height
+        components.html(html_code, height=box_height, scrolling=True)
         
     else:
         st.error("입력된 결과가 없습니다. 숫자를 입력해주세요.")
