@@ -6,7 +6,7 @@ import base64
 # 1. 페이지 설정
 st.set_page_config(page_title="XAUUSD 수익 계산기", layout="centered")
 
-# [디자인] 앱 메인 제목 (크기를 줄여 모바일 한 줄 출력)
+# 앱 메인 제목 (크기를 줄여 모바일 한 줄 출력)
 st.markdown("<h3 style='text-align: center; margin-bottom: 20px;'>🎯 트레이딩 수익 계산기</h3>", unsafe_allow_html=True)
 
 # 2. 설정 섹션
@@ -25,7 +25,6 @@ with st.expander("⚙️ 기본 설정 (이미지에 포함됨)", expanded=True)
 
 # 3. 사진 첨부 섹션
 st.subheader("📸 거래기록 화면 첨부 (선택)")
-# 도움말 제공: 인앱 브라우저 권한 문제 방지
 st.info("💡 **팁:** 버튼을 누르면 앨범 선택이나 카메라 촬영이 가능합니다. 카메라가 안 뜨면 크롬/사파리 브라우저로 접속해 주세요.")
 uploaded_photo = st.file_uploader("거래 내역을 캡처하거나 직접 찍어서 올려주세요", type=['png', 'jpg', 'jpeg'])
 
@@ -114,8 +113,8 @@ if st.button("🚀 수익 인증 이미지 생성하기", use_container_width=Tr
                 .set-val {{ font-weight: bold; color: #2d3436; }}
 
                 .stats {{ display: flex; justify-content: space-around; margin-bottom: 20px; }}
-                .stat-box {{ text-align: center; font-size: 12px; font-weight: bold; color: #636e72; }}
-                .stat-box span {{ display: block; font-size: 16px; color: #2d3436; margin-top: 3px; }}
+                .stat-box {{ text-align: center; font-size: 11px; font-weight: bold; color: #636e72; }}
+                .stat-box span {{ display: block; font-size: 15px; color: #2d3436; margin-top: 3px; }}
                 
                 .table-container {{ flex-grow: 1; }}
                 .table {{ width: 100%; border-collapse: collapse; font-size: 13px; }}
@@ -137,9 +136,10 @@ if st.button("🚀 수익 인증 이미지 생성하기", use_container_width=Tr
                 </div>
                 
                 <div class="profit-banner">
-                    <div style="font-size:12px; font-weight:bold; opacity:0.9;">오늘의 순손익 (NET PROFIT)</div>
+                    <div style="font-size:12px; font-weight:bold; opacity:0.9;">오늘의 거래 결과</div>
                     <div class="amount">{sign}{net_profit:.1f}$</div>
                     <div style="font-weight:bold; font-size: 14px;">수익률: {sign}{profit_rate:.2f}%</div>
+                    <div style="font-size:10px; opacity:0.8; margin-top:3px;">(펀딩 거래 수익 제외)</div>
                 </div>
 
                 <div class="settings-grid">
@@ -159,8 +159,8 @@ if st.button("🚀 수익 인증 이미지 생성하기", use_container_width=Tr
 
                 <div class="stats">
                     <div class="stat-box">총 거래<span>{count}회</span></div>
-                    <div class="stat-box">수익<span>{win_count}회</span></div>
-                    <div class="stat-box">성공<span>{loss_count}회</span></div>
+                    <div class="stat-box">TP 수익<span>{win_count}회</span></div>
+                    <div class="stat-box">챌린지 달성<span>{loss_count}회</span></div>
                 </div>
 
                 <div class="table-container">
