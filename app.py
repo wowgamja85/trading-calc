@@ -6,7 +6,7 @@ import base64
 # 페이지 설정
 st.set_page_config(page_title="XAUUSD 수익 계산기", layout="centered")
 
-st.title("🎯 트레이딩 수익 계산기")
+st.markdown("<h3 style='text-align: center; margin-bottom: 20px;'>🎯 트레이딩 수익 계산기</h3>", unsafe_allow_html=True)
 
 # 1. 설정 섹션
 with st.expander("⚙️ 기본 설정 (이미지에 포함됨)", expanded=True):
@@ -22,16 +22,22 @@ with st.expander("⚙️ 기본 설정 (이미지에 포함됨)", expanded=True)
         chaTP = st.number_input("챌린지 TP (틱)", value=2720, step=100)
         chaSL = st.number_input("챌린지 SL (틱)", value=580, step=10)
 
-# 2. 사진 첨부 섹션
+# [업그레이드 됨] 2. 사진 첨부 (업로드 vs 카메라 선택)
 st.subheader("📸 거래기록 화면 첨부 (선택)")
-uploaded_photo = st.file_uploader("거래 내역을 사진찍어서 업로드 해주세요", type=['png', 'jpg', 'jpeg'])
+photo_method = st.radio("사진 첨부 방식을 선택하세요", ["🖼️ 앨범에서 업로드", "📷 카메라로 바로 촬영"], horizontal=True)
+
+uploaded_photo = None
+if photo_method == "🖼️ 앨범에서 업로드":
+    uploaded_photo = st.file_uploader("거래 내역 스크린샷 등을 올려주세요", type=['png', 'jpg', 'jpeg'])
+else:
+    uploaded_photo = st.camera_input("PC 화면 등을 카메라로 직접 촬영하세요")
 
 # 3. 거래 입력 섹션
 st.subheader("📊 오늘의 거래 입력")
 col_g1, col_g2 = st.columns(2)
 game_type = col_g1.selectbox("게임 종류 ($)", [100, 300, 500], index=1)
 
-# [수정된 부분] 수수료 자동 계산 (보험금 랏수 * 20)
+# 수수료 자동 계산 (보험금 랏수 * 20)
 fee_per_game = insLot * 20
 col_g2.text_input("게임당 수수료 ($) - 자동계산", value=f"{fee_per_game:.1f}", disabled=True)
 
@@ -68,7 +74,7 @@ if st.button("🚀 수익 인증 이미지 생성하기", use_container_width=Tr
             v_label = "수익" if v > 0 else "성공"
             table_html += f"<tr><td>{i+1}회차</td><td style='color:{v_color}; font-weight:bold;'>{v:+.1f}$</td><td>{v_label}</td></tr>"
 
-        # 사진 처리
+        # 사진 처리 (업로드 파일이나 카메라 사진 모두 동일하게 처리됨)
         photo_html = ""
         if uploaded_photo:
             photo_b64 = base64.b64encode(uploaded_photo.getvalue()).decode()
@@ -126,7 +132,7 @@ if st.button("🚀 수익 인증 이미지 생성하기", use_container_width=Tr
         <body>
             <div id="captureArea">
                 <div class="header">
-                    <h2 style="margin:0; font-size: 20px; color: #2d3436; letter-spacing: -0.5px;">트레이딩 수익 인증</h2>
+                    <h2 style="margin:0; font-size: 17px; color: #2d3436; letter-spacing: -0.5px;">트레이딩 수익 인증</h2>
                     <div class="date">{today_date}</div>
                 </div>
                 
