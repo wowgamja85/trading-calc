@@ -3,12 +3,13 @@ import datetime
 import streamlit.components.v1 as components
 import base64
 
-# 페이지 설정
+# 1. 페이지 설정
 st.set_page_config(page_title="XAUUSD 수익 계산기", layout="centered")
 
+# [디자인] 앱 메인 제목 (크기를 줄여 모바일 한 줄 출력)
 st.markdown("<h3 style='text-align: center; margin-bottom: 20px;'>🎯 트레이딩 수익 계산기</h3>", unsafe_allow_html=True)
 
-# 1. 설정 섹션
+# 2. 설정 섹션
 with st.expander("⚙️ 기본 설정 (이미지에 포함됨)", expanded=True):
     col1, col2 = st.columns(2)
     with col1:
@@ -22,28 +23,24 @@ with st.expander("⚙️ 기본 설정 (이미지에 포함됨)", expanded=True)
         chaTP = st.number_input("챌린지 TP (틱)", value=2720, step=100)
         chaSL = st.number_input("챌린지 SL (틱)", value=580, step=10)
 
-# [업그레이드 됨] 2. 사진 첨부 (업로드 vs 카메라 선택)
+# 3. 사진 첨부 섹션
 st.subheader("📸 거래기록 화면 첨부 (선택)")
-photo_method = st.radio("사진 첨부 방식을 선택하세요", ["🖼️ 앨범에서 업로드", "📷 카메라로 바로 촬영"], horizontal=True)
+# 도움말 제공: 인앱 브라우저 권한 문제 방지
+st.info("💡 **팁:** 버튼을 누르면 앨범 선택이나 카메라 촬영이 가능합니다. 카메라가 안 뜨면 크롬/사파리 브라우저로 접속해 주세요.")
+uploaded_photo = st.file_uploader("거래 내역을 캡처하거나 직접 찍어서 올려주세요", type=['png', 'jpg', 'jpeg'])
 
-uploaded_photo = None
-if photo_method == "🖼️ 앨범에서 업로드":
-    uploaded_photo = st.file_uploader("거래 내역 스크린샷 등을 올려주세요", type=['png', 'jpg', 'jpeg'])
-else:
-    uploaded_photo = st.camera_input("PC 화면 등을 카메라로 직접 촬영하세요")
-
-# 3. 거래 입력 섹션
+# 4. 거래 입력 섹션
 st.subheader("📊 오늘의 거래 입력")
 col_g1, col_g2 = st.columns(2)
 game_type = col_g1.selectbox("게임 종류 ($)", [100, 300, 500], index=1)
 
-# 수수료 자동 계산 (보험금 랏수 * 20)
+# [자동 계산] 수수료 = 보험금 랏수 * 20
 fee_per_game = insLot * 20
 col_g2.text_input("게임당 수수료 ($) - 자동계산", value=f"{fee_per_game:.1f}", disabled=True)
 
-results_text = st.text_area("거래별 결과 입력 (엔터로 구분)", placeholder="예:\n367.5\n-2028")
+results_text = st.text_area("거래별 결과 입력 (엔터로 구분)", placeholder="예:\n367.5\n-2028\n380")
 
-# 4. 계산 및 이미지 생성
+# 5. 계산 및 대시보드 생성
 if st.button("🚀 수익 인증 이미지 생성하기", use_container_width=True):
     lines = results_text.strip().split('\n')
     results = []
@@ -60,6 +57,7 @@ if st.button("🚀 수익 인증 이미지 생성하기", use_container_width=Tr
         win_count = len([x for x in results if x > 0])
         loss_count = len([x for x in results if x < 0])
         
+        # 순수익 및 수익률 계산
         net_profit = total_earned + total_loss - (count * game_type) - (count * fee_per_game)
         profit_rate = (net_profit / (count * game_type)) * 100 if count > 0 else 0
         
@@ -67,15 +65,16 @@ if st.button("🚀 수익 인증 이미지 생성하기", use_container_width=Tr
         bg_hex = "linear-gradient(135deg, #00b894, #00cec9)" if net_profit >= 0 else "linear-gradient(135deg, #e17055, #fd79a8)"
         sign = "+" if net_profit >= 0 else ""
         
-        # 거래 내역 테이블 HTML
+        # 거래 내역 테이블 HTML 생성
         table_html = ""
         for i, v in enumerate(results):
             v_color = "#00b894" if v > 0 else "#e17055"
             v_label = "수익" if v > 0 else "성공"
             table_html += f"<tr><td>{i+1}회차</td><td style='color:{v_color}; font-weight:bold;'>{v:+.1f}$</td><td>{v_label}</td></tr>"
 
-        # 사진 처리 (업로드 파일이나 카메라 사진 모두 동일하게 처리됨)
+        # 사진 데이터 처리 (Base64 인코딩)
         photo_html = ""
+        extra_height = 0
         if uploaded_photo:
             photo_b64 = base64.b64encode(uploaded_photo.getvalue()).decode()
             photo_html = f"""
@@ -83,8 +82,9 @@ if st.button("🚀 수익 인증 이미지 생성하기", use_container_width=Tr
                 <img src="data:image/jpeg;base64,{photo_b64}" style="width: 100%; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
             </div>
             """
+            extra_height = 350
 
-        # HTML/CSS 9:16 레이아웃
+        # [HTML/CSS/JS] 9:16 비율 대시보드 및 다운로드 기능
         html_code = f"""
         <!DOCTYPE html>
         <html>
@@ -195,6 +195,8 @@ if st.button("🚀 수익 인증 이미지 생성하기", use_container_width=Tr
 
         st.divider()
         st.success("✅ 대시보드가 생성되었습니다. 아래 버튼을 눌러 이미지를 저장하세요.")
-        components.html(html_code, height=950, scrolling=True)
+        # 화면 출력 창 높이 자동 조절
+        box_height = 650 + (count * 40) + extra_height
+        components.html(html_code, height=box_height, scrolling=True)
     else:
         st.error("입력값이 없습니다. 숫자를 입력해주세요.")
