@@ -23,8 +23,8 @@ with st.expander("⚙️ 기본 설정 (이미지에 포함됨)", expanded=True)
         chaSL = st.number_input("챌린지 SL (틱)", value=580, step=10)
 
 # 2. 사진 첨부 섹션
-st.subheader("📸 증거 사진 첨부 (선택)")
-uploaded_photo = st.file_uploader("거래 내역 스크린샷 등을 올려주세요", type=['png', 'jpg', 'jpeg'])
+st.subheader("📸 거래기록 화면 첨부 (선택)")
+uploaded_photo = st.file_uploader("거래 내역을 사진찍어서 업로드 해주세요", type=['png', 'jpg', 'jpeg'])
 
 # 3. 거래 입력 섹션
 st.subheader("📊 오늘의 거래 입력")
