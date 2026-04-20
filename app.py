@@ -9,15 +9,7 @@ st.set_page_config(page_title="XAUUSD 수익 계산기", layout="centered")
 # [디자인] 앱 메인 제목 (모바일 한 줄 출력을 위해 크기 조절)
 st.markdown("<h3 style='text-align: center; margin-bottom: 20px;'>🎯 트레이딩 수익 계산기</h3>", unsafe_allow_html=True)
 
-# 2. 홈 화면 바로가기 설치 가이드
-with st.expander("📲 스마트폰 홈 화면에 앱처럼 추가하는 법", expanded=False):
-    tab1, tab2 = st.tabs(["🍎 아이폰 (Safari)", "🤖 갤럭시 (Chrome/삼성)"])
-    with tab1:
-        st.markdown("1. Safari 하단 **[공유하기 ⍐]** 아이콘 클릭\n2. **[홈 화면에 추가 ＋]** 클릭\n3. 우측 상단 **[추가]** 클릭")
-    with tab2:
-        st.markdown("1. 브라우저 우측 상단/하단 **[메뉴 ⋮ 또는 ≡]** 클릭\n2. **[홈 화면에 추가]** 클릭\n3. **[추가]** 클릭")
-
-# 3. 설정 섹션
+# 2. 설정 섹션
 with st.expander("⚙️ 기본 설정 (이미지에 포함됨)", expanded=True):
     col1, col2 = st.columns(2)
     with col1:
@@ -31,12 +23,12 @@ with st.expander("⚙️ 기본 설정 (이미지에 포함됨)", expanded=True)
         chaTP = st.number_input("챌린지 TP (틱)", value=2720, step=100)
         chaSL = st.number_input("챌린지 SL (틱)", value=580, step=10)
 
-# 4. 사진 첨부 섹션 (앨범/카메라 통합)
+# 3. 사진 첨부 섹션 (앨범/카메라 통합)
 st.subheader("📸 거래기록 화면 첨부 (선택)")
 st.info("💡 **팁:** 아래 버튼을 눌러 사진을 찍거나 앨범에서 선택하세요. 카메라가 안 뜨면 크롬/사파리로 접속해 주세요.")
 uploaded_photo = st.file_uploader("여기를 눌러 사진을 첨부하세요", type=['png', 'jpg', 'jpeg'])
 
-# 5. 거래 입력 섹션
+# 4. 거래 입력 섹션
 st.subheader("📊 오늘의 거래 입력")
 col_g1, col_g2 = st.columns(2)
 game_type = col_g1.selectbox("게임 종류 ($)", [100, 300, 500], index=1)
@@ -47,7 +39,7 @@ col_g2.text_input("게임당 수수료 ($) - 자동계산", value=f"{fee_per_gam
 
 results_text = st.text_area("거래별 결과 입력 (엔터로 구분)", placeholder="예:\n367.5\n-2028\n380")
 
-# 6. 계산 및 대시보드 생성
+# 5. 계산 및 대시보드 생성
 if st.button("🚀 수익 인증 이미지 생성하기", use_container_width=True):
     lines = results_text.strip().split('\n')
     results = []
@@ -91,7 +83,7 @@ if st.button("🚀 수익 인증 이미지 생성하기", use_container_width=Tr
             """
             extra_height = 350
 
-        # HTML/JS 9:16 레이아웃 (문구 수정 반영)
+        # HTML/JS 9:16 레이아웃
         html_code = f"""
         <!DOCTYPE html>
         <html>
